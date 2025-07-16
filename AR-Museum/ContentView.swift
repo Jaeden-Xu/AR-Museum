@@ -353,7 +353,7 @@ struct ArtifactModelView: View {
                         // 根据不同的文物调整缩放比例
                         switch modelName {
                         case "成化款斗彩鸡缸杯":
-                            modelEntity.scale = [0.1, 0.1, 0.1]
+                            modelEntity.scale = [0.08, 0.08, 0.08]
                         case "龙泉窑青釉凸雕缠枝莲纹瓶":
                             modelEntity.scale = [0.1, 0.1, 0.1]
                         case "斗彩海兽纹天字罐":
@@ -362,6 +362,12 @@ struct ArtifactModelView: View {
                             modelEntity.scale = [0.1, 0.1, 0.1]
                         case "光绪款粉彩云蝠纹赏瓶":
                             modelEntity.scale = [0.1, 0.1, 0.1]
+                        case "万历款青花穿花龙纹带盖梅瓶":
+                            modelEntity.scale = [0.13, 0.13, 0.13]
+                        case "万历款五彩海水云龙纹六棱蟋蟀罐":
+                            modelEntity.scale = [0.07, 0.07, 0.07]
+                        case "天启款青花罗汉图兽纽钟":
+                            modelEntity.scale = [0.08, 0.08, 0.08]
                         default:
                             modelEntity.scale = [0.1, 0.1, 0.1]
                         }
