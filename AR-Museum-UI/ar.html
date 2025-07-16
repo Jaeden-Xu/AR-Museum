@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AR博物馆 - AR模式</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/model-viewer@1.12.0/dist/model-viewer.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-color: #000;
+      color: #ffffff;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* 状态栏 */
+    .status-bar {
+      height: 47px;
+      width: 100%;
+      background-color: rgba(0,0,0,0.3);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      color: white;
+    }
+    
+    .status-bar-content {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      padding-top: 10px;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    .status-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* AR视图 */
+    model-viewer {
+      width: 100%;
+      height: 100vh;
+      background-color: transparent;
+      --poster-color: transparent;
+    }
+
+    /* 退出按钮 */
+    .exit-button {
+      position: absolute;
+      top: 67px;
+      left: 20px;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: none;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      z-index: 20;
+    }
+
+    /* 底部控制栏 */
+    .control-bar {
+      position: fixed;
+      bottom: 40px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding: 0 20px;
+      z-index: 10;
+    }
+    
+    .control-button {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      border: none;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .control-button.main {
+      width: 70px;
+      height: 70px;
+      background: white;
+      color: black;
+    }
+
+    /* 信息提示 */
+    .info-tooltip {
+      position: fixed;
+      top: 47%;
+      left: 0;
+      right: 0;
+      text-align: center;
+      padding: 15px;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 12px;
+      margin: 0 auto;
+      max-width: 300px;
+      font-size: 14px;
+      opacity: 0.9;
+      transform: translateY(-50%);
+      z-index: 5;
+    }
+    
+    /* AR交互提示 */
+    .ar-instructions {
+      position: absolute;
+      bottom: 120px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      margin: 0 auto;
+    }
+    
+    .instruction-card {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 16px;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      font-size: 14px;
+      max-width: 280px;
+    }
+    
+    .instruction-icon {
+      font-size: 24px;
+      color: rgba(255,255,255,0.9);
+    }
+    
+    /* 模型大小调整滑块 */
+    .size-slider {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 150px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 10;
+    }
+    
+    .slider-track {
+      height: 100px;
+      width: 4px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 4px;
+      margin: 10px 0;
+      position: relative;
+    }
+    
+    .slider-thumb {
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    .size-icon {
+      color: white;
+      font-size: 16px;
+    }
+
+    /* 模型选择菜单 */
+    .model-selector {
+      position: absolute;
+      left: 20px;
+      top: 120px;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 16px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 10;
+    }
+    
+    .model-option {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      background-size: cover;
+      background-position: center;
+      border: 2px solid transparent;
+    }
+    
+    .model-option.active {
+      border-color: white;
+      box-shadow: 0 0 10px rgba(255,255,255,0.5);
+    }
+
+    /* 记录按钮 */
+    .record-button {
+      position: absolute;
+      top: 67px;
+      right: 20px;
+      background: rgba(255,0,0,0.7);
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      z-index: 20;
+      color: white;
+    }
+    
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(255, 0, 0, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 状态栏 -->
+  <div class="status-bar">
+    <div class="status-bar-content">
+      <div>11:30</div>
+      <div class="status-bar-right">
+        <i class="fas fa-signal"></i>
+        <i class="fas fa-wifi"></i>
+        <i class="fas fa-battery-full"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- AR模型查看器 -->
+  <model-viewer
+    id="ar-viewer"
+    src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+    alt="AR模式文物"
+    ar
+    ar-modes="webxr scene-viewer quick-look"
+    ar-scale="fixed"
+    camera-controls
+    ar-placement="floor"
+    shadow-intensity="1"
+    auto-rotate>
+  </model-viewer>
+
+  <!-- 退出按钮 -->
+  <a href="home.html" class="exit-button">
+    <i class="fas fa-arrow-left"></i>
+  </a>
+  
+  <!-- 记录按钮 -->
+  <button class="record-button pulse" id="recordButton">
+    <i class="fas fa-video"></i>
+  </button>
+  
+  <!-- 模型选择菜单 -->
+  <div class="model-selector">
+    <div class="model-option active" style="background-image: url(https://images.unsplash.com/photo-1618414466256-4b62f39b5b30?q=80&w=100)"></div>
+    <div class="model-option" style="background-image: url(https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?q=80&w=100)"></div>
+    <div class="model-option" style="background-image: url(https://images.unsplash.com/photo-1551551476-9479cb8b6602?q=80&w=100)"></div>
+  </div>
+  
+  <!-- 大小控制滑块 -->
+  <div class="size-slider">
+    <div class="size-icon">
+      <i class="fas fa-plus"></i>
+    </div>
+    <div class="slider-track">
+      <div class="slider-thumb" id="sizeThumb"></div>
+    </div>
+    <div class="size-icon">
+      <i class="fas fa-minus"></i>
+    </div>
+  </div>
+  
+  <!-- AR交互提示 -->
+  <div class="ar-instructions" id="arInstructions">
+    <div class="instruction-card">
+      <div class="instruction-icon">
+        <i class="fas fa-hand-pointer"></i>
+      </div>
+      <div>
+        轻触平面放置文物，拖动可旋转和缩放
+      </div>
+    </div>
+  </div>
+  
+  <!-- 信息提示 -->
+  <div class="info-tooltip" id="infoTooltip">
+    请移动手机以检测平面
+  </div>
+  
+  <!-- 底部控制栏 -->
+  <div class="control-bar">
+    <button class="control-button">
+      <i class="fas fa-redo"></i>
+    </button>
+    <button class="control-button main">
+      <i class="fas fa-cube"></i>
+    </button>
+    <button class="control-button">
+      <i class="fas fa-share"></i>
+    </button>
+  </div>
+
+  <script>
+    // 获取元素引用
+    const arViewer = document.getElementById('ar-viewer');
+    const infoTooltip = document.getElementById('infoTooltip');
+    const arInstructions = document.getElementById('arInstructions');
+    const sizeThumb = document.getElementById('sizeThumb');
+    const recordButton = document.getElementById('recordButton');
+    const modelOptions = document.querySelectorAll('.model-option');
+    
+    // 模型数据
+    const models = [
+      {
+        name: '秦始皇兵马俑',
+        src: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb'
+      },
+      {
+        name: '青铜器"四羊方尊"',
+        src: 'https://modelviewer.dev/shared-assets/models/Horse.glb'
+      },
+      {
+        name: '越王勾践剑',
+        src: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb'
+      }
+    ];
+    
+    // 模拟AR会话状态
+    let arSessionStarted = false;
+    
+    // AR会话状态变化
+    setTimeout(() => {
+      infoTooltip.textContent = "已检测到平面，点击放置文物";
+      setTimeout(() => {
+        infoTooltip.style.opacity = "0";
+        arSessionStarted = true;
+      }, 3000);
+    }, 2000);
+    
+    // 模型选择
+    modelOptions.forEach((option, index) => {
+      option.addEventListener('click', () => {
+        modelOptions.forEach(opt => opt.classList.remove('active'));
+        option.classList.add('active');
+        
+        // 更换模型
+        if (models[index]) {
+          arViewer.src = models[index].src;
+          
+          // 显示已切换提示
+          infoTooltip.textContent = `已切换至 ${models[index].name}`;
+          infoTooltip.style.opacity = "0.9";
+          setTimeout(() => {
+            infoTooltip.style.opacity = "0";
+          }, 1500);
+        }
+      });
+    });
+    
+    // 大小调整滑块
+    let isDragging = false;
+    
+    sizeThumb.addEventListener('mousedown', startDrag);
+    sizeThumb.addEventListener('touchstart', startDrag);
+    
+    function startDrag() {
+      isDragging = true;
+    }
+    
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('touchmove', drag);
+    
+    function drag(event) {
+      if (!isDragging) return;
+      
+      const sliderTrack = document.querySelector('.slider-track');
+      const trackRect = sliderTrack.getBoundingClientRect();
+      
+      let y;
+      if (event.type === 'touchmove') {
+        y = event.touches[0].clientY;
+      } else {
+        y = event.clientY;
+      }
+      
+      // 计算位置百分比
+      let percentage = (trackRect.bottom - y) / trackRect.height;
+      percentage = Math.max(0, Math.min(percentage, 1));
+      
+      // 设置滑块位置
+      sizeThumb.style.top = `${(1 - percentage) * 100}%`;
+      
+      // 更新模型大小 (0.5x - 2x 范围)
+      const scale = 0.5 + percentage * 1.5;
+      arViewer.scale = `${scale} ${scale} ${scale}`;
+      
+      event.preventDefault();
+    }
+    
+    document.addEventListener('mouseup', stopDrag);
+    document.addEventListener('touchend', stopDrag);
+    
+    function stopDrag() {
+      isDragging = false;
+    }
+    
+    // 录制按钮
+    let isRecording = false;
+    
+    recordButton.addEventListener('click', () => {
+      isRecording = !isRecording;
+      
+      if (isRecording) {
+        recordButton.classList.remove('pulse');
+        recordButton.innerHTML = '<i class="fas fa-stop"></i>';
+        infoTooltip.textContent = "正在录制...";
+        infoTooltip.style.opacity = "0.9";
+      } else {
+        recordButton.classList.add('pulse');
+        recordButton.innerHTML = '<i class="fas fa-video"></i>';
+        infoTooltip.textContent = "录制已保存";
+        infoTooltip.style.opacity = "0.9";
+        
+        setTimeout(() => {
+          infoTooltip.style.opacity = "0";
+        }, 1500);
+      }
+    });
+    
+    // 放置指示
+    arViewer.addEventListener('ar-status', (event) => {
+      if (event.detail.status === 'session-started') {
+        arInstructions.style.display = 'flex';
+      } else if (event.detail.status === 'object-placed') {
+        arInstructions.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html> 

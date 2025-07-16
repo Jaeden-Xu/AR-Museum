@@ -27,6 +27,10 @@
 		A74FD2E92E26768400F5C305 /* AR-Museum.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "AR-Museum.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A74FD2F62E26768500F5C305 /* AR-MuseumTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "AR-MuseumTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A74FD3002E26768500F5C305 /* AR-MuseumUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "AR-MuseumUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A74FD31F2E26770400F5C305 /* ar.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = ar.html; sourceTree = "<group>"; };
+		A74FD3202E26770400F5C305 /* home.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = home.html; sourceTree = "<group>"; };
+		A74FD3212E26770400F5C305 /* index.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
+		A74FD3222E26770400F5C305 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -43,6 +47,11 @@
 		A74FD3032E26768500F5C305 /* AR-MuseumUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "AR-MuseumUITests";
+			sourceTree = "<group>";
+		};
+		A74FD3322E2685EB00F5C305 /* Models */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -79,6 +88,8 @@
 				A74FD2F92E26768500F5C305 /* AR-MuseumTests */,
 				A74FD3032E26768500F5C305 /* AR-MuseumUITests */,
 				A74FD2EA2E26768400F5C305 /* Products */,
+				A74FD3232E26770400F5C305 /* AR-Museum-UI */,
+				A74FD3322E2685EB00F5C305 /* Models */,
 			);
 			sourceTree = "<group>";
 		};
@@ -90,6 +101,17 @@
 				A74FD3002E26768500F5C305 /* AR-MuseumUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		A74FD3232E26770400F5C305 /* AR-Museum-UI */ = {
+			isa = PBXGroup;
+			children = (
+				A74FD31F2E26770400F5C305 /* ar.html */,
+				A74FD3202E26770400F5C305 /* home.html */,
+				A74FD3212E26770400F5C305 /* index.html */,
+				A74FD3222E26770400F5C305 /* README.md */,
+			);
+			path = "AR-Museum-UI";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -109,6 +131,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				A74FD2EB2E26768400F5C305 /* AR-Museum */,
+				A74FD3322E2685EB00F5C305 /* Models */,
 			);
 			name = "AR-Museum";
 			packageProductDependencies = (

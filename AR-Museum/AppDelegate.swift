@@ -24,8 +24,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window.rootViewController = UIHostingController(rootView: contentView)
         self.window = window
         window.makeKeyAndVisible()
+        
+        // Hide status bar for the entire application
+        // application.isStatusBarHidden = true
+        
         return true
     }
+
+    // Override to support hiding status bar
+    // override var prefersStatusBarHidden: Bool {
+    //     return true
+    // }
 
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.

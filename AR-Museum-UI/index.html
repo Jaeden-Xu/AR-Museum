@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AR博物馆原型</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background-color: #f5f5f7;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    .phone-container {
+      width: 430px;
+      height: 932px;
+      background: white;
+      border-radius: 55px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      border: 1px solid #d1d1d6;
+    }
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      overflow: hidden;
+      border-radius: 55px;
+    }
+    .prototype-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+      gap: 40px;
+      padding: 40px;
+    }
+    .prototype-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    .prototype-title {
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: 500;
+      color: #1d1d1f;
+    }
+  </style>
+</head>
+<body>
+  <header class="bg-gray-900 text-white py-6">
+    <div class="container mx-auto px-6">
+      <h1 class="text-3xl font-bold">AR博物馆原型设计</h1>
+      <p class="text-gray-400 mt-2">iPhone 16 Pro 尺寸 (430×932px)</p>
+    </div>
+  </header>
+
+  <div class="container mx-auto">
+    <div class="prototype-grid">
+      <!-- 主页 -->
+      <div class="prototype-item">
+        <div class="phone-container">
+          <iframe src="home.html" class="screen"></iframe>
+        </div>
+        <div class="prototype-title">主页 - 文物展示</div>
+      </div>
+      
+      <!-- AR模式 -->
+      <div class="prototype-item">
+        <div class="phone-container">
+          <iframe src="ar.html" class="screen"></iframe>
+        </div>
+        <div class="prototype-title">AR模式</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html> 

@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AR博物馆 - 主页</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-color: #000;
+      color: #ffffff;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* 状态栏 */
+    .status-bar {
+      height: 47px;
+      width: 100%;
+      background-color: rgba(0,0,0,0.2);
+      backdrop-filter: blur(10px);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      color: white;
+    }
+    
+    .status-bar-content {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      padding-top: 10px;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    .status-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* 主要内容 */
+    .content {
+      padding-top: 47px;
+      height: calc(100vh - 47px);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* 3D立方体容器 */
+    .cube-container {
+      width: 100%;
+      height: 70%;
+      background-color: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 1000px;
+    }
+    
+    /* 3D立方体及其旋转容器 */
+    .cube-scene {
+      width: 200px;
+      height: 200px;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: rotate 20s infinite linear;
+    }
+    
+    @keyframes rotate {
+      0% { transform: rotateY(0) rotateX(15deg); }
+      100% { transform: rotateY(360deg) rotateX(15deg); }
+    }
+    
+    /* 立方体的各个面 */
+    .cube-face {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    
+    .cube-face.front { transform: translateZ(100px); background: linear-gradient(135deg, #ff9966, #ff5e62); }
+    .cube-face.back { transform: rotateY(180deg) translateZ(100px); background: linear-gradient(135deg, #4facfe, #00f2fe); }
+    .cube-face.left { transform: rotateY(-90deg) translateZ(100px); background: linear-gradient(135deg, #43e97b, #38f9d7); }
+    .cube-face.right { transform: rotateY(90deg) translateZ(100px); background: linear-gradient(135deg, #fa709a, #fee140); }
+    .cube-face.top { transform: rotateX(90deg) translateZ(100px); background: linear-gradient(135deg, #f093fb, #f5576c); }
+    .cube-face.bottom { transform: rotateX(-90deg) translateZ(100px); background: linear-gradient(135deg, #30cfd0, #330867); }
+    
+    /* 立方体阴影 */
+    .cube-shadow {
+      position: absolute;
+      bottom: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 160px;
+      height: 30px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 50%;
+      filter: blur(10px);
+    }
+    
+    /* 文物特效 */
+    .artifact-glow {
+      position: absolute;
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+    }
+    
+    /* 信息卡片 */
+    .info-card {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top-left-radius: 30px;
+      border-top-right-radius: 30px;
+      box-shadow: 0 -10px 30px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease-in-out;
+      max-height: 50%;
+      overflow-y: auto;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .card-handle {
+      width: 40px;
+      height: 5px;
+      background-color: rgba(255,255,255,0.3);
+      border-radius: 5px;
+      margin: 0 auto 15px;
+    }
+
+    /* AR按钮 */
+    .ar-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: none;
+      color: white;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      z-index: 10;
+    }
+    
+    /* 滑动指示器 */
+    .swipe-indicator {
+      position: absolute;
+      top: 50%;
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      padding: 0 10px;
+      pointer-events: none;
+    }
+    
+    .swipe-arrow {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      opacity: 0.7;
+    }
+
+    /* 文物导航点 */
+    .artifact-dots {
+      position: absolute;
+      bottom: calc(50% - 70px);
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: rgba(255,255,255,0.3);
+    }
+    
+    .dot.active {
+      background-color: white;
+      transform: scale(1.2);
+    }
+  </style>
+</head>
+<body>
+  <!-- 状态栏 -->
+  <div class="status-bar">
+    <div class="status-bar-content">
+      <div>11:30</div>
+      <div class="status-bar-right">
+        <i class="fas fa-signal"></i>
+        <i class="fas fa-wifi"></i>
+        <i class="fas fa-battery-full"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主要内容 -->
+  <div class="content" id="content">
+    <!-- AR按钮 -->
+    <a href="ar.html" class="ar-button">
+      <i class="fas fa-vr-cardboard"></i>
+    </a>
+    
+    <!-- 3D立方体文物展示 -->
+    <div class="cube-container" id="cubeContainer">
+      <div class="cube-scene" id="cubeScene">
+        <div class="cube-face front">秦始皇兵马俑</div>
+        <div class="cube-face back">青铜器</div>
+        <div class="cube-face left">文物</div>
+        <div class="cube-face right">国宝</div>
+        <div class="cube-face top">古代遗产</div>
+        <div class="cube-face bottom">中国文化</div>
+        <div class="cube-shadow"></div>
+      </div>
+      <div class="artifact-glow"></div>
+    </div>
+    
+    <!-- 文物导航点 -->
+    <div class="artifact-dots">
+      <div class="dot active"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+    
+    <!-- 滑动指示器 -->
+    <div class="swipe-indicator">
+      <div class="swipe-arrow">
+        <i class="fas fa-chevron-left"></i>
+      </div>
+      <div class="swipe-arrow">
+        <i class="fas fa-chevron-right"></i>
+      </div>
+    </div>
+    
+    <!-- 信息卡片 -->
+    <div class="info-card" id="infoCard">
+      <div class="card-handle"></div>
+      <div class="card-header">
+        <h2 class="text-xl font-bold">秦始皇兵马俑</h2>
+        <span class="text-sm opacity-70">距今2200年</span>
+      </div>
+      
+      <p class="text-sm opacity-80 mb-3">
+        兵马俑，即秦始皇兵马俑，亦简称秦兵马俑或秦俑，位于今陕西省西安市临潼区秦始皇陵以东1.5公里处的兵马俑坑内。兵马俑是古代墓葬雕塑的一个类别。
+      </p>
+      
+      <div class="flex justify-between items-center mt-4">
+        <div>
+          <span class="text-xs opacity-70">收藏于</span>
+          <h4 class="font-medium">秦始皇帝陵博物院</h4>
+        </div>
+        <button class="bg-white text-black px-4 py-2 rounded-full text-sm font-medium">了解更多</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 定义文物数据
+    const artifacts = [
+      {
+        id: 1,
+        name: '秦始皇兵马俑',
+        period: '距今2200年',
+        description: '兵马俑，即秦始皇兵马俑，亦简称秦兵马俑或秦俑，位于今陕西省西安市临潼区秦始皇陵以东1.5公里处的兵马俑坑内。兵马俑是古代墓葬雕塑的一个类别。',
+        museum: '秦始皇帝陵博物院',
+        colors: ['#ff9966', '#ff5e62']
+      },
+      {
+        id: 2,
+        name: '青铜器"四羊方尊"',
+        period: '距今3000年',
+        description: '四羊方尊是商代晚期青铜礼器，1938年出土于湖南省宁乡县黄材镇月山铺，现收藏于中国国家博物馆。四羊方尊造型独特，纹饰华美，是中国商代青铜器的代表作品之一。',
+        museum: '中国国家博物馆',
+        colors: ['#4facfe', '#00f2fe']
+      },
+      {
+        id: 3,
+        name: '越王勾践剑',
+        period: '距今2500年',
+        description: '越王勾践剑，出土于1965年江苏省吴县（今苏州）七子山1号墓，是中国春秋末期越王勾践的佩剑，距今已有2500多年的历史，被列为"国宝"级文物。',
+        museum: '湖北省博物馆',
+        colors: ['#43e97b', '#38f9d7']
+      }
+    ];
+
+    let currentArtifactIndex = 0;
+    const cubeScene = document.getElementById('cubeScene');
+    const infoCard = document.getElementById('infoCard');
+    const contentEl = document.getElementById('content');
+    const dots = document.querySelectorAll('.dot');
+
+    // 更新当前文物显示
+    function updateArtifact(index) {
+      const artifact = artifacts[index];
+      
+      // 更新立方体颜色
+      const frontFace = document.querySelector('.cube-face.front');
+      frontFace.textContent = artifact.name;
+      frontFace.style.background = `linear-gradient(135deg, ${artifact.colors[0]}, ${artifact.colors[1]})`;
+      
+      // 更新信息卡片
+      const cardHeader = infoCard.querySelector('.card-header');
+      cardHeader.innerHTML = `
+        <h2 class="text-xl font-bold">${artifact.name}</h2>
+        <span class="text-sm opacity-70">${artifact.period}</span>
+      `;
+      
+      const cardDescription = infoCard.querySelector('p');
+      cardDescription.textContent = artifact.description;
+      
+      const cardFooter = infoCard.querySelector('.flex.justify-between');
+      cardFooter.innerHTML = `
+        <div>
+          <span class="text-xs opacity-70">收藏于</span>
+          <h4 class="font-medium">${artifact.museum}</h4>
+        </div>
+        <button class="bg-white text-black px-4 py-2 rounded-full text-sm font-medium">了解更多</button>
+      `;
+      
+      // 更新导航点
+      dots.forEach((dot, i) => {
+        if (i === index) {
+          dot.classList.add('active');
+        } else {
+          dot.classList.remove('active');
+        }
+      });
+
+      // 添加过渡动画
+      cubeScene.style.animation = 'none';
+      setTimeout(() => {
+        cubeScene.style.animation = 'rotate 20s infinite linear';
+      }, 50);
+    }
+
+    // 用户交互 - 点击立方体
+    cubeScene.addEventListener('click', function() {
+      // 添加点击动画
+      this.style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        this.style.transform = 'scale(1)';
+      }, 150);
+    });
+
+    // 初始化Hammer.js手势识别
+    const hammer = new Hammer(contentEl);
+    hammer.on('swipeleft', function() {
+      if (currentArtifactIndex < artifacts.length - 1) {
+        currentArtifactIndex++;
+        updateArtifact(currentArtifactIndex);
+      }
+    });
+    
+    hammer.on('swiperight', function() {
+      if (currentArtifactIndex > 0) {
+        currentArtifactIndex--;
+        updateArtifact(currentArtifactIndex);
+      }
+    });
+
+    // 初始化展示
+    updateArtifact(currentArtifactIndex);
+  </script>
+</body>
+</html> 
